@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,19 +12,23 @@ public class CarMovement : MonoBehaviour
     
     public bool isEngineOn = false;
     public bool isBrake = false;
+    public bool isEnd = false;
 
     public GameObject EndPanel;
     
     public Text distanceText;
     public Text finalText;
-
+    public Text allDistanceText;
     
     [Header("Başlangıç Yazıları")]
     public GameObject startTextGO;
     public GameObject endTextGO;
 
+    public GameObject particle;
+    
     void Awake()
     {
+        isEnd = false;
         endTextGO.SetActive(false);
         EndPanel.SetActive(false);
     }
@@ -38,23 +43,35 @@ public class CarMovement : MonoBehaviour
         // car movement
         if (Input.GetKeyDown(KeyCode.E)) isEngineOn = true;
     
-        if (isEngineOn && !isBrake)
+        if (isEngineOn && !isBrake && !isEnd)
         {
             startTextGO.SetActive(false);
             rb.velocity = transform.forward * speed;
         }
         else if (isBrake)
         {
-            rb.velocity = Vector3.zero; // fren basılıysa dur
+            rb.velocity = Vector3.zero;
+            isEnd = true;
         }
         
+        // ray
+        Ray ray = new Ray(transform.position, transform.forward);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, 100f))
+        {
+            float d = Vector3.Distance(hit.transform.position, this.transform.position);
+            allDistanceText.text = "Mesafe: "+ d.ToString("F0");
+        }
 
         // brake control & distance text
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && isEngineOn && !isEnd)
         { 
+            isEnd = true;
             isBrake = true;
+            
             float distance = Vector3.Distance(transform.position, wall.position);
             distanceText.text = "Duvarla Arandaki Mesafe: " + distance.ToString("F0") + "m";
+            
             endTextGO.SetActive(true);
             
             if (distance <= 5)
@@ -74,10 +91,8 @@ public class CarMovement : MonoBehaviour
                 finalText.text = "Dalga geçiyor olmalısın...";
             }
             EndPanel.SetActive(true);
+
         }
-        
-        
-        
     }
 
     public void restartScene()
@@ -85,4 +100,18 @@ public class CarMovement : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
+    void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.CompareTag("Wall"))
+        {
+            //Destroy(this.gameObject);
+            Instantiate(particle,this.gameObject.transform.position,Quaternion.identity);
+
+            isEnd = true;
+            EndPanel.SetActive(true);
+            distanceText.text = "Duvarla Arandaki Mesafe: 0m";
+            finalText.text = "Öldün ho.";
+            endTextGO.SetActive(true);
+        }
+    }
 }
