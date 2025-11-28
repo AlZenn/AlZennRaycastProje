@@ -7,7 +7,6 @@ using UnityEngine.UI;
 public class CarMovement : MonoBehaviour
 {
     public float speed = 10f;
-    public Transform wall;
     public Rigidbody rb;
     
     public bool isEngineOn = false;
@@ -25,6 +24,7 @@ public class CarMovement : MonoBehaviour
     public GameObject endTextGO;
 
     public GameObject particle;
+    public float distance;
     
     void Awake()
     {
@@ -40,7 +40,6 @@ public class CarMovement : MonoBehaviour
 
     void Update()
     {
-        // car movement
         if (Input.GetKeyDown(KeyCode.E)) isEngineOn = true;
     
         if (isEngineOn && !isBrake && !isEnd)
@@ -54,22 +53,19 @@ public class CarMovement : MonoBehaviour
             isEnd = true;
         }
         
-        // ray
         Ray ray = new Ray(transform.position, transform.forward);
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit, 100f))
         {
-            float d = Vector3.Distance(hit.transform.position, this.transform.position);
-            allDistanceText.text = "Mesafe: "+ d.ToString("F0");
+            distance = hit.distance;
+            allDistanceText.text = "Mesafe: "+ distance.ToString("F0");
         }
 
-        // brake control & distance text
         if (Input.GetKeyDown(KeyCode.Space) && isEngineOn && !isEnd)
         { 
             isEnd = true;
             isBrake = true;
             
-            float distance = Vector3.Distance(transform.position, wall.position);
             distanceText.text = "Duvarla Arandaki Mesafe: " + distance.ToString("F0") + "m";
             
             endTextGO.SetActive(true);
@@ -104,7 +100,6 @@ public class CarMovement : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Wall"))
         {
-            //Destroy(this.gameObject);
             Instantiate(particle,this.gameObject.transform.position,Quaternion.identity);
 
             isEnd = true;
