@@ -6,15 +6,17 @@ using UnityEngine.UI;
 
 public class CarMovement : MonoBehaviour
 {
+    [Header("Hareket Ayarları")]
     public float speed = 10f;
     public Rigidbody rb;
     
+    [Header("Durum Değişkenleri")]
     public bool isEngineOn = false;
     public bool isBrake = false;
     public bool isEnd = false;
 
+    [Header("UI Elemanları")]
     public GameObject EndPanel;
-    
     public Text distanceText;
     public Text finalText;
     public Text allDistanceText;
@@ -23,14 +25,14 @@ public class CarMovement : MonoBehaviour
     public GameObject startTextGO;
     public GameObject endTextGO;
 
+    [Header("Efektler")]
     public GameObject particle;
-    public float distance;
+    
+    private float distance;
     
     void Awake()
     {
-        isEnd = false;
-        endTextGO.SetActive(false);
-        EndPanel.SetActive(false);
+        InitializeGame();
     }
 
     void Start()
@@ -40,8 +42,29 @@ public class CarMovement : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E)) isEngineOn = true;
-    
+        HandleInput();
+        HandleMovement();
+        UpdateDistance();
+    }
+
+    void InitializeGame()
+    {
+        isEnd = false;
+        endTextGO.SetActive(false);
+        EndPanel.SetActive(false);
+    }
+
+    void HandleInput()
+    {
+        if (Input.GetKeyDown(KeyCode.E)) 
+            isEngineOn = true;
+
+        if (Input.GetKeyDown(KeyCode.Space) && isEngineOn && !isEnd)
+            StopCar();
+    }
+
+    void HandleMovement()
+    {
         if (isEngineOn && !isBrake && !isEnd)
         {
             startTextGO.SetActive(false);
@@ -50,45 +73,44 @@ public class CarMovement : MonoBehaviour
         else if (isBrake)
         {
             rb.velocity = Vector3.zero;
-            isEnd = true;
         }
-        
+    }
+
+    void UpdateDistance()
+    {
         Ray ray = new Ray(transform.position, transform.forward);
         RaycastHit hit;
+        
         if (Physics.Raycast(ray, out hit, 100f))
         {
             distance = hit.distance;
-            allDistanceText.text = "Mesafe: "+ distance.ToString("F0");
+            allDistanceText.text = "Mesafe: " + distance.ToString("F0");
         }
+    }
 
-        if (Input.GetKeyDown(KeyCode.Space) && isEngineOn && !isEnd)
-        { 
-            isEnd = true;
-            isBrake = true;
-            
-            distanceText.text = "Duvarla Arandaki Mesafe: " + distance.ToString("F0") + "m";
-            
-            endTextGO.SetActive(true);
-            
-            if (distance <= 5)
-            {
-                finalText.text = "SÜPER! DURUŞ...";
-            } 
-            else if (distance <= 10)
-            {
-                finalText.text = "Ortalama ya...";
-            }
-            else if (distance <= 15)
-            {
-                finalText.text = "Çok erken durdun...";
-            }
-            else
-            {
-                finalText.text = "Dalga geçiyor olmalısın...";
-            }
-            EndPanel.SetActive(true);
+    void StopCar()
+    {
+        isEnd = true;
+        isBrake = true;
+        
+        endTextGO.SetActive(true);
+        ShowEndResult();
+    }
 
-        }
+    void ShowEndResult()
+    {
+        distanceText.text = "Duvarla Arandaki Mesafe: " + distance.ToString("F0") + "m";
+        
+        if (distance <= 5)
+            finalText.text = "SÜPER! DURUŞ...";
+        else if (distance <= 10)
+            finalText.text = "Ortalama ya...";
+        else if (distance <= 15)
+            finalText.text = "Çok erken durdun...";
+        else
+            finalText.text = "Dalga geçiyor olmalısın...";
+        
+        EndPanel.SetActive(true);
     }
 
     public void restartScene()
@@ -100,13 +122,13 @@ public class CarMovement : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Wall"))
         {
-            Instantiate(particle,this.gameObject.transform.position,Quaternion.identity);
-
+            Instantiate(particle, transform.position, Quaternion.identity);
+            
             isEnd = true;
-            EndPanel.SetActive(true);
+            endTextGO.SetActive(true);
             distanceText.text = "Duvarla Arandaki Mesafe: 0m";
             finalText.text = "Öldün ho.";
-            endTextGO.SetActive(true);
+            EndPanel.SetActive(true);
         }
     }
 }
