@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Random = System.Random;
 
 public class CarMovement : MonoBehaviour
 {
@@ -37,6 +38,7 @@ public class CarMovement : MonoBehaviour
 
     void Start()
     {
+        speed = UnityEngine.Random.Range(10f, 20f);
         rb = GetComponent<Rigidbody>();
     }
 
