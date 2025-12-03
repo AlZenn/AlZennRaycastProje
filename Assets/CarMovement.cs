@@ -86,6 +86,8 @@ public class CarMovement : MonoBehaviour
         if (Physics.Raycast(ray, out hit, 100f))
         {
             distance = hit.distance;
+            // ya da 
+            //distance = (transform.position - hit.transform.position).magnitude;
             allDistanceText.text = "Mesafe: " + distance.ToString("F0");
         }
     }
