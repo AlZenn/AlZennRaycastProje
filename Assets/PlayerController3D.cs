@@ -10,14 +10,11 @@ public class PlayerController3D : MonoBehaviour
     public float moveSpeed = 5f;
     public Text distanceText;
     
-    
     public float distance;
-    
-    
-    public List<GameObject> cars;
     
     public GameObject carPrefab;
     public float radius = 50f;
+    
     private void Update()
     {
         #region movement
@@ -36,32 +33,31 @@ public class PlayerController3D : MonoBehaviour
 
         Collider[] hits = Physics.OverlapSphere(transform.position, radius);
         
+        float minDistance = Mathf.Infinity;
+        bool carFound = false;
+        
         foreach (Collider hit in hits)
         {
             if (hit.CompareTag("Car"))
             {
-                cars.Add(hit.gameObject);
-            }
-        }
-
-        if (cars.Count > 0)
-        {
-            float minDistance = Mathf.Infinity;
-            
-            foreach (GameObject car in cars)
-            {
-                float currentDistance = Vector3.Distance(transform.position, car.transform.position);
+                carFound = true;
+                float currentDistance = Vector3.Distance(transform.position, hit.transform.position);
                 if (currentDistance < minDistance)
                 {
                     minDistance = currentDistance;
                 }
             }
-            
-            distance = minDistance;
         }
 
-        if(cars.Count > 0) distanceText.text = "Distance: " + distance.ToString("F0");
-        else distanceText.text = "Cars Not Found";
+        if (carFound)
+        {
+            distance = minDistance;
+            distanceText.text = "Distance: " + distance.ToString("F0");
+        }
+        else
+        {
+            distanceText.text = "Cars Not Found";
+        }
     }
 
     private void OnCollisionEnter(Collision other)
