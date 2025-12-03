@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class PlayerController3D : MonoBehaviour
 {
+    public int car = 0;
+    public Text carText;
     
     public float moveSpeed = 5f;
     public Text distanceText;
@@ -17,6 +19,10 @@ public class PlayerController3D : MonoBehaviour
     
     private void Update()
     {
+        if(car<10) carText.text = car.ToString() + "/10";
+        else carText.text = "Well Done!";
+        
+        
         #region movement
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
@@ -65,7 +71,7 @@ public class PlayerController3D : MonoBehaviour
         if (other.collider.CompareTag("Car"))
         {
             Destroy(other.gameObject);
-            
+            car++;
             #region çakma spawner
             Vector3 randomDirection = UnityEngine.Random.onUnitSphere;
             randomDirection.y = 0f;
